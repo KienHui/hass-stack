@@ -41,6 +41,19 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+  rinq-mqtt:
+    container_name: "rinq-mqtt"
+    depends_on: 
+      eclipse-mosquitto:
+        condition: service_started
+    image: "tsightler/ring-mqtt:latest"
+    ports:
+      - "8554:8554/tcp"
+    volumes:
+      - "/volume1/docker/ringmqtt:/data"
+    networks:
+      hass:
+        ipv4_address: 192.168.3.202
 
 
 networks:
