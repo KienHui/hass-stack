@@ -41,6 +41,25 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+  onstar2mqtt:
+    container_name: "onstar2mqtt"
+    depends_on: 
+      eclipse-mosquitto:
+        condition: service_started
+    environment:      
+      - "ONSTAR_DEVICEID=${ONSTAR_DEVICEID}"
+      - "ONSTAR_VIN=${ONSTAR_VIN}"
+      - "ONSTAR_USERNAME=${ONSTAR_USERNAME}"
+      - "ONSTAR_PASSWORD=${ONSTAR_PASSWORD}"
+      - "ONSTAR_PIN=${ONSTAR_PIN}"
+      - "MQTT_HOST=192.168.3.201"
+      - "MQTT_USERNAME="
+      - "MQTT_PASSWORD="
+    image: "michaelwoods/onstar2mqtt:latest"
+    restart: "unless-stopped"
+    working_dir: "/app"
+    networks:
+      - hass
   rinq-mqtt:
     container_name: "rinq-mqtt"
     depends_on: 
