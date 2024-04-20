@@ -1,0 +1,55 @@
+version: "3.6"
+services:
+  eclipse-mosquitto:
+    container_name: "eclipse-mosquitto"
+    image: "eclipse-mosquitto:latest"
+    ports:
+      - "1883:1883/tcp"
+      - "9001:9001/tcp"
+    volumes:
+      - "/volume1/docker/mosquitto:/mosquitto"
+      - "/volume1/docker/mosquitto/data:/mosquitto/data"
+      - "/volume1/docker/mosquitto/data:/mosquitto/log"
+    networks:
+      hass:
+        ipv4_address: 192.168.3.201
+    depends_on: 
+      home-assistant:
+        condition: service_started
+  home-assistant:
+    container_name: "home-assistant"
+    environment:
+      - "TZ=UTC"      
+      - TAILSCALE_STATE_DIR=/var/lib/tailscale
+      - TAILSCALE_SERVE_PORT=8123
+      - TAILSCALE_SERVE_MODE=https
+      - TAILSCALE_USE_SSH=1
+      - TAILSCALE_HOSTNAME=hass
+      - "TAILSCALE_AUTHKEY==${TS_AUTHKEY}"
+      - "DOCKER_MODS=ghcr.io/tailscale-dev/docker-mod:main"
+    hostname: "home-assistant"
+    image: "linuxserver/homeassistant:latest"
+    restart: "always"
+    volumes:
+      - "/volume1/docker/synology:/config"        
+      - "/volume1/docker/synology/varlib:/var/lib"        # State data will be stored in this directory
+      - "/dev/net/tun:/dev/net/tun"                      # Required for tailscale to work
+    working_dir: "/config"
+    networks:
+      hass:
+        ipv4_address: 192.168.3.200
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+
+networks:
+  hass:
+    driver: macvlan
+    driver_opts:
+      parent: ovs_eth0
+    ipam:
+      config:
+      - subnet: 192.168.1.0/20
+        ip_range: 192.168.3.128/28
+        gateway: 192.168.1.1
