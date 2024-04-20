@@ -73,6 +73,18 @@ services:
     networks:
       hass:
         ipv4_address: 192.168.3.202
+  pv2mqtt:
+    image: ghcr.io/wez/govee2mqtt:latest
+    container_name: govee2mqtt
+    restart: unless-stopped
+    environment:      
+      - "GOVEE_EMAIL=${GOVEE_EMAIL}"
+      - "GOVEE_PASSWORD=${GOVEE_PASSWORD}"
+      - "GOVEE_API_KEY=${GOVEE_API_KEY}"
+      - "GOVEE_MQTT_HOST=192.168.3.201"
+    networks:
+      hass:
+        ipv4_address: 192.168.3.205
 
 
 networks:
